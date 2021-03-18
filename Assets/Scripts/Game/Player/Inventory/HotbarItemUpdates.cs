@@ -24,10 +24,8 @@ public class HotbarItemUpdates {
 
     public void highlightCurrentHotbarSlot(Transform transform, int slot, Item item) {
         Transform outlineCanvas = transform.Find("Hotbar/Outline Canvas");
-        Debug.Log("name: " + item.name);
-        string itemName = item.name;
 
-        if (itemName != null) {
+        if (item != null) {
             // If moving to an item and the canvas is hidden, show it
             outlineCanvas.gameObject.SetActive(true);
 

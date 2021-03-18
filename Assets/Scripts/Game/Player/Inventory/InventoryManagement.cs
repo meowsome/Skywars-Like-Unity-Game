@@ -41,10 +41,10 @@ public class InventoryManagement : MonoBehaviour {
         } else return false;
     }
 
-    public void Remove(string name, int amount, Vector3 pos) {
+    public GameObject[] Remove(string name, int amount, Vector3 pos) {
         Item itemSearchResults = inventory.FirstOrDefault(item => item.name == name);
 
-        // Add to existing item stack
+        // Remove from item stack
         if (itemSearchResults != null) {
             if (itemValidator.isStackable(itemSearchResults)) {
                 // Remove amount from stack
@@ -54,8 +54,9 @@ public class InventoryManagement : MonoBehaviour {
                     // If no more left in this stack, remove from inventory and hotbar
                     inventory.Remove(itemSearchResults);
                     hotbarItemUpdates.setHotbarItemPositions(transform.Find("Hotbar/Items Canvas"));
+                    hotbarItemUpdates.highlightCurrentHotbarSlot(transform, activeItemSlot, null); // Un-highlight hotbar slot
                     // Actually remove from hotbar
-                    Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name));
+                    Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name).gameObject);
                 } else {
                     // Decrement in hotbar
                     hotbarItemUpdates.incrementItemInHotbar(itemSearchResults);
@@ -64,19 +65,29 @@ public class InventoryManagement : MonoBehaviour {
                 // Remove entire item, no stack
                 inventory.Remove(itemSearchResults);
                 hotbarItemUpdates.setHotbarItemPositions(transform.Find("Hotbar/Items Canvas"));
+                hotbarItemUpdates.highlightCurrentHotbarSlot(transform, activeItemSlot, null); // Un-highlight hotbar slot
                 // Actually remove from hotbar
-                Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name));
+                Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name).gameObject);
             }
 
             // Spawn new amount of item at feet
-            for (int i = 0; i < amount; i++) {
-                CreateDroppedItem(itemSearchResults.name, pos);
-            }
-        }
+            return CreateDroppedItem(itemSearchResults.name, pos, amount);
+        } else return new GameObject[0];
     }
 
-    public void CreateDroppedItem(string name, Vector3 pos) {
-        Instantiate(Resources.Load(name), pos, Quaternion.identity);
+    public GameObject[] CreateDroppedItem(string name, Vector3 pos, int amount) {
+        GameObject[] items = new GameObject[100];
+        for (int i = 0; i < amount; i++) {
+            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/" + name.ToLower() + ".prefab", typeof(GameObject));
+            GameObject item = Instantiate(prefab, pos, Quaternion.identity);
+
+            item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
+            item.name = name;
+
+            items[i] = item;
+        }
+
+        return items;
     }
 
     public int InventoryCount() {

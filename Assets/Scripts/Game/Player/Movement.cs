@@ -200,7 +200,9 @@ public class Movement : NetworkBehaviour {
 
         // If drop key pressed, remove active item
         if (Input.GetKey(dropKey)) {
-            inventoryManagement.Remove(inventoryManagement.activeItem.name, 1, transform.position);
+            GameObject[] drops = inventoryManagement.Remove(inventoryManagement.activeItem.name, 1, transform.position);
+
+            if (drops.Length > 0) CreateItemServer(drops);
         }
     }
 
@@ -243,6 +245,13 @@ public class Movement : NetworkBehaviour {
     [Command]
     void DestroyItemServer(GameObject item) {
         NetworkServer.Destroy(item);
+    }
+
+    [Command]
+    void CreateItemServer(GameObject[] items) {
+        foreach (GameObject item in items) {
+            NetworkServer.Spawn(item);
+        }
     }
 
     [Command]
