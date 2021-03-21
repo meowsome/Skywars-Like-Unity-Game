@@ -31,6 +31,9 @@ public class Movement : NetworkBehaviour {
     private string playerName;
     private HealthBar healthBar;
     private KeyCode dropKey = KeyCode.Q;
+    private float cooldown = 0;
+    private float cooldownAmount = 0.25f;
+    private bool cooldownActive = false;
 
     void Start() {     
         if (isLocalPlayer && !isServer) {
@@ -67,6 +70,7 @@ public class Movement : NetworkBehaviour {
                 setHUDItems();
                 handleMovement();
                 handleInventoryInput();
+                KeyPressCooldown();
             }
         } else hideOtherHotbar();
     }
@@ -199,10 +203,35 @@ public class Movement : NetworkBehaviour {
         }
 
         // If drop key pressed, remove active item
-        if (Input.GetKey(dropKey)) {
-            GameObject[] drops = inventoryManagement.Remove(inventoryManagement.activeItem.name, 1, transform.position);
+        if (Input.GetKey(dropKey) && !cooldownActive) {
+            cooldown = cooldownAmount;
+            cooldownActive = true;
+            HandleDrop();
+        }
+    }
 
-            if (drops.Length > 0) CreateItemServer(drops);
+    private void KeyPressCooldown() {
+        // Decrease cooldown
+        if (cooldownActive && cooldown > 0) {
+            cooldown -= Time.deltaTime;
+        }
+
+        // If below zero, stpo cooldown.
+        if (cooldown < 0) {
+            cooldown = 0;
+            cooldownActive = false;
+        }
+    }
+
+    // If actual item in the slot, drop it!
+    private void HandleDrop() {
+        if (inventoryManagement.activeItem != null) {
+            CreateItemServer(transform.position + transform.forward * 3, 1, inventoryManagement.activeItem.name.ToLower()); // Create the dropped item in front of the player
+            inventoryManagement.Remove(inventoryManagement.activeItem.name, 1); // Remove the item from their inventory
+
+            // Update held item to either the next item in the players inventory, or null if none left
+            string itemName = (inventoryManagement.activeItem != null) ? inventoryManagement.activeItem.name : null;
+            UpdateHeldItemForAllUsersServer(playerName, itemName);
         }
     }
 
@@ -248,22 +277,59 @@ public class Movement : NetworkBehaviour {
     }
 
     [Command]
-    void CreateItemServer(GameObject[] items) {
-        foreach (GameObject item in items) {
+    void CreateItemServer(Vector3 pos, int amount, string itemName) {
+        int i = 0;
+
+        for(i = 0; i < amount; i++) {
+            // Get item prefab and get texture for it
+            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/item.prefab", typeof(GameObject));
+            
+            GameObject item = Instantiate(prefab, pos, Quaternion.identity);
+
+            item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
+            item.name = itemName;
+
+            Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
+            item.GetComponent<RawImage>().texture = texture;
+
             NetworkServer.Spawn(item);
+
+            CreateItemClient(item, pos, itemName);
         }
+    }
+
+    [ClientRpc]
+    void CreateItemClient(GameObject item, Vector3 pos, string itemName) {
+        // Only need to update the current existing item
+        item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
+        item.name = itemName;
+        item.transform.position = pos;
+
+        Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
+        item.GetComponent<RawImage>().texture = texture;
     }
 
     [Command]
     void UpdateHeldItemForAllUsersServer(string playerName, string itemName) {
-        GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
+        // If item name provided, set held item. Otherwise, set to blank (dropping item)
+        Sprite sprite = GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite;
+        if (itemName != null) {
+            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
+        } else {
+            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = null;
+        }
 
         UpdateHeldItemForAllUsersClient(playerName, itemName);
     }
 
     [ClientRpc]
     void UpdateHeldItemForAllUsersClient(string playersName, string itemName) {
-        GameObject.Find(playersName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
+        Sprite sprite = GameObject.Find(playersName + "/Held Item").GetComponent<SpriteRenderer>().sprite;
+        if (itemName != null) {
+            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
+        } else {
+            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = null;
+        }
     }
 
     [Command]

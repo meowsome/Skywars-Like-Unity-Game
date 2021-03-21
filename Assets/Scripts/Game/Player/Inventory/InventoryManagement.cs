@@ -21,13 +21,15 @@ public class InventoryManagement : MonoBehaviour {
     }
 
     public bool Add(string name, int amount) {
-        Item itemSearchResults = inventory.FirstOrDefault(item => item.name == name);
+        Item itemSearchResults = inventory.FirstOrDefault(item => item.name.ToLower() == name.ToLower());
 
         // Add to existing item stack
-        if (itemSearchResults != null && itemValidator.isStackable(itemSearchResults) && itemSearchResults.amount + amount <= stackSize) {
-            itemSearchResults.amount += amount;
-            hotbarItemUpdates.incrementItemInHotbar(itemSearchResults);
-            return true;
+        if (itemSearchResults != null) {
+            if (itemValidator.isStackable(itemSearchResults) && itemSearchResults.amount + amount <= stackSize) {
+                itemSearchResults.amount += amount;
+                hotbarItemUpdates.incrementItemInHotbar(itemSearchResults);
+                return true;
+            } else return false; // If item found and not stackable, no need to add
         } else if (inventory.Count < itemValidator.getMaxInventorySize()) {
             // Create new item stack
             Item item = new Item {
@@ -41,7 +43,8 @@ public class InventoryManagement : MonoBehaviour {
         } else return false;
     }
 
-    public GameObject[] Remove(string name, int amount, Vector3 pos) {
+    // Only remove an item from inventory or decrease item from stack of items 
+    public void Remove(string name, int amount) {
         Item itemSearchResults = inventory.FirstOrDefault(item => item.name == name);
 
         // Remove from item stack
@@ -57,6 +60,8 @@ public class InventoryManagement : MonoBehaviour {
                     hotbarItemUpdates.highlightCurrentHotbarSlot(transform, activeItemSlot, null); // Un-highlight hotbar slot
                     // Actually remove from hotbar
                     Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name).gameObject);
+                    
+                    setActiveItemSlot(activeItemSlot);
                 } else {
                     // Decrement in hotbar
                     hotbarItemUpdates.incrementItemInHotbar(itemSearchResults);
@@ -68,27 +73,11 @@ public class InventoryManagement : MonoBehaviour {
                 hotbarItemUpdates.highlightCurrentHotbarSlot(transform, activeItemSlot, null); // Un-highlight hotbar slot
                 // Actually remove from hotbar
                 Destroy(transform.Find("Hotbar/Items Canvas/" + itemSearchResults.name).gameObject);
+                setActiveItemSlot(activeItemSlot);
             }
-
-            // Spawn new amount of item at feet
-            return CreateDroppedItem(itemSearchResults.name, pos, amount);
-        } else return new GameObject[0];
-    }
-
-    public GameObject[] CreateDroppedItem(string name, Vector3 pos, int amount) {
-        GameObject[] items = new GameObject[100];
-        for (int i = 0; i < amount; i++) {
-            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/" + name.ToLower() + ".prefab", typeof(GameObject));
-            GameObject item = Instantiate(prefab, pos, Quaternion.identity);
-
-            item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
-            item.name = name;
-
-            items[i] = item;
         }
-
-        return items;
     }
+
 
     public int InventoryCount() {
         return inventory.Count;

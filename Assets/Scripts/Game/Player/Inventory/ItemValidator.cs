@@ -9,17 +9,17 @@ public class ItemValidator {
 
     public bool isStackable(Item item) {
         string itemType = getItemType(item);
-        return itemType != "Weapon"; // Weapons are not stackable
+        return itemType != "weapon"; // Weapons are not stackable
     }
 
     private string getItemType(Item item) {
-        switch (item.name) {
-            case "Watergun":
-                return "Weapon";
-            case "Potato":
-                return "Food";
+        switch (item.name.ToLower()) {
+            case "watergun":
+                return "weapon";
+            case "potato":
+                return "food";
             default:
-                return "Other";
+                return "other";
         }
     }
 }

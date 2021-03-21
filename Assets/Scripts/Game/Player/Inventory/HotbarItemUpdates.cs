@@ -38,7 +38,7 @@ public class HotbarItemUpdates {
     }
     
     public void setHotbarPosition(Transform transform, int activeItemSlot, int numberOfItems, Item item) {
-        if (numberOfItems > 0 && (numItemsOld != numberOfItems || width != Screen.width)) {
+        if (numItemsOld != numberOfItems || width != Screen.width) {
             transform.Find(hotbarPath + "Background Canvas/Background").GetComponent<RectTransform>().sizeDelta = new Vector2(offset * 2 * numberOfItems, hotbarHeight); // Update the width and height, x2 because needs to cover entire item width
             
             transform.Find(hotbarPath + "Background Canvas/Background").transform.position = new Vector3(Screen.width - transform.Find(hotbarPath + "Background Canvas/Background").GetComponent<RectTransform>().sizeDelta.x / 2, 0, 0); // Update the position to bottom right
