@@ -98,7 +98,7 @@ public class MapHandlerServer : NetworkBehaviour {
     private void StartGame() {
         map.timer = 600; // 10 mins
         map.status = 1;
-        map.playersAlive = map.players;
+        map.playersAlive = new List<string>(map.players);
     }
 
     private void RefreshTime() {
@@ -112,7 +112,7 @@ public class MapHandlerServer : NetworkBehaviour {
         List<string> winningPlayers = map.playersAlive; // Whoever is remaining is the winner
 
         map.timer = 60; // 1 min
-        map.playersAlive = map.players;
+        map.playersAlive = new List<string>(map.players);
 
         //Stop users from moving
         //Teleport all users to finish area
