@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,14 +8,35 @@ using System.Collections.Generic;
 using System.Collections;
 
 public class MapHandlerClient : NetworkBehaviour {
-    private Map map;
+    [SyncVar] List<string> players = new List<string>();
     [SyncVar] float timer;
     private static float updateInterval = 0.3f;
 
     void Start() {
-        map = GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().map;
-        
-        if (isLocalPlayer) StartCoroutine(UpdateTimer(updateInterval));
+        if (isLocalPlayer) {
+            StartCoroutine(UpdateTimer(updateInterval));
+
+            AddPlayer(this.netId.ToString());
+        }
+    }
+
+    // Client told server that it joined 
+    [Command]
+    private void AddPlayer(string id) {
+        // If players list not contain ID, add it
+        if (!players.Contains(id)) {
+            players.Add(id);
+            SyncPlayersList(players);
+
+            // Send to the MapHandlerServer
+            GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().map.players = players;
+        }
+    }
+
+    // Server told all clients it has a new players list to overwrite the old one
+    [ClientRpc]
+    private void SyncPlayersList(List<string> players) {
+        this.players = players;
     }
 
     IEnumerator UpdateTimer(float updateInterval) {
