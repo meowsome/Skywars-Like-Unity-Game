@@ -34,6 +34,7 @@ public class Movement : NetworkBehaviour {
     private float cooldown = 0;
     private float cooldownAmount = 0.25f;
     private bool cooldownActive = false;
+    private MapHandlerClient mapHandler;
 
     void Start() {     
         if (isLocalPlayer && !isServer) {
@@ -56,6 +57,8 @@ public class Movement : NetworkBehaviour {
             itemValidator = new ItemValidator();
             pauseManager = GameObject.Find("Pause").GetComponent<PauseManager>();
             healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+
+            mapHandler = transform.GetComponent<MapHandlerClient>();
         } else if (isServer && !started) {
             Debug.Log("Server started");
             started = true;
@@ -226,7 +229,7 @@ public class Movement : NetworkBehaviour {
     // If actual item in the slot, drop it!
     private void HandleDrop() {
         if (inventoryManagement.activeItem != null) {
-            CreateItemServer(transform.position + transform.forward * 3, 1, inventoryManagement.activeItem.name.ToLower()); // Create the dropped item in front of the player
+            mapHandler.CreateItem(transform.position + transform.forward * 3, 1, inventoryManagement.activeItem.name.ToLower()); // Create the dropped item in front of the player
             inventoryManagement.Remove(inventoryManagement.activeItem.name, 1); // Remove the item from their inventory
 
             // Update held item to either the next item in the players inventory, or null if none left
@@ -274,39 +277,6 @@ public class Movement : NetworkBehaviour {
     [Command]
     void DestroyItemServer(GameObject item) {
         NetworkServer.Destroy(item);
-    }
-
-    [Command]
-    void CreateItemServer(Vector3 pos, int amount, string itemName) {
-        int i = 0;
-
-        for(i = 0; i < amount; i++) {
-            // Get item prefab and get texture for it
-            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/item.prefab", typeof(GameObject));
-            
-            GameObject item = Instantiate(prefab, pos, Quaternion.identity);
-
-            item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
-            item.name = itemName;
-
-            Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
-            item.GetComponent<RawImage>().texture = texture;
-
-            NetworkServer.Spawn(item);
-
-            CreateItemClient(item, pos, itemName);
-        }
-    }
-
-    [ClientRpc]
-    void CreateItemClient(GameObject item, Vector3 pos, string itemName) {
-        // Only need to update the current existing item
-        item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
-        item.name = itemName;
-        item.transform.position = pos;
-
-        Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
-        item.GetComponent<RawImage>().texture = texture;
     }
 
     [Command]

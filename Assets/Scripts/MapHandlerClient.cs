@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -50,5 +50,11 @@ public class MapHandlerClient : NetworkBehaviour {
     void CmdSyncVarWithClients() {
         float newTimer = GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().map.timer; // Get new timer from the MapHandlerServer class, which only server has access to
         RpcSyncVarWithClients(newTimer);
+    }
+
+    // Player needs to create new item, tell server to make it
+    [Command]
+    public void CreateItem(Vector3 pos, int amount, string itemName) {
+        GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().CreateItemServer(pos, amount, itemName);
     }
 }

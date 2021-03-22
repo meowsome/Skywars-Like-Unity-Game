@@ -6,10 +6,13 @@ using Mirror;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Globalization;
+using UnityEditor;
 
 public class MapHandlerServer : NetworkBehaviour {
     public Map map { get; set; }
     private static float updateInterval = 0.3f;
+    private bool createdStartingItems = false;
 
     void Start() {
         if (isServer) {
@@ -20,6 +23,21 @@ public class MapHandlerServer : NetworkBehaviour {
             
             StartCoroutine(UpdateTimer(updateInterval));
         }
+    }
+
+    void Update() {
+        // If a player has joined and starting items have not been created yet, create them
+        if (isServer && map.players.Count > 0 && !createdStartingItems) {
+            createStartingItems();
+        }
+    }
+
+    private void createStartingItems() {
+        createdStartingItems = true;
+        CreateItemServer(new Vector3(5, 0, 0), 1, "Watergun");
+        CreateItemServer(new Vector3(10, 0, 0), 1, "Watergun");
+        CreateItemServer(new Vector3(15, 0, 0), 1, "Watergun");
+        CreateItemServer(new Vector3(20, 0, 0), 1, "Watergun");
     }
 
     IEnumerator UpdateTimer(float updateInterval) {
@@ -125,5 +143,37 @@ public class MapHandlerServer : NetworkBehaviour {
         int seconds = Mathf.FloorToInt(map.timer - minutes * 60);
 
         return string.Format("{0:0}:{1:00}", minutes, seconds);
+    }
+
+    public void CreateItemServer(Vector3 pos, int amount, string itemName) {
+        int i = 0;
+
+        for(i = 0; i < amount; i++) {
+            // Get item prefab and get texture for it
+            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/item.prefab", typeof(GameObject));
+            
+            GameObject item = Instantiate(prefab, pos, Quaternion.identity);
+
+            item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
+            item.name = itemName;
+
+            Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
+            item.GetComponent<RawImage>().texture = texture;
+
+            NetworkServer.Spawn(item);
+
+            CreateItemClient(item, pos, itemName);
+        }
+    }    
+
+    [ClientRpc]
+    void CreateItemClient(GameObject item, Vector3 pos, string itemName) {
+        // Only need to update the current existing item
+        item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
+        item.name = itemName;
+        item.transform.position = pos;
+
+        Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
+        item.GetComponent<RawImage>().texture = texture;
     }
 }
