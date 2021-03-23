@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +10,9 @@ public class ItemBehavior : MonoBehaviour {
 
     void Start() {
         move = new Vector3(0, 0, 0);
+
+        // Prevent collisions with players
+        Physics.IgnoreCollision(GameObject.FindWithTag("Player").GetComponent<Collider>(), GetComponent<Collider>());
     }
 
     void Update() {
