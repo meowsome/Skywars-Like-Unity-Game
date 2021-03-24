@@ -11,25 +11,27 @@ public class FallDamage : NetworkBehaviour {
     private HealthBar healthBar;
     bool fallen = false;
     float damage = 0;
+    float pos = 0;
 
     void Start() {
         if (isLocalPlayer) {
             this.controller = GetComponent<CharacterController>();
             this.healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+            pos = controller.transform.position.y;
         }
     }
 
     void Update() {
         if (isLocalPlayer) {
             if (controller.velocity.y < 0) {
-                // Count time as "fall time"
-                damage += Time.deltaTime;
+                if (!fallen) pos = controller.transform.position.y; // Update position that the player started from
+                damage += Time.deltaTime; // Count time as "fall damage"
                 fallen = true;
             } else if (fallen) {
                 // Whenver player is not falling anymore...
 
-                // If player passes falling threshold
-                if (damage > 0.5) {
+                // If player has been falling for 0.5 seconds and has fallen more than 5 units
+                if (damage > 0.5 && pos - controller.transform.position.y > 5) {
                     healthBar.decreaseHealth((float) Math.Pow(1 + damage, 6));
                 }
 
