@@ -18,4 +18,8 @@ public class HealthBar : MonoBehaviour {
         this.health = health;
         slider.value = health;
     }
+
+    public void decreaseHealth(float decreaseAmount) {
+        setHealth(health - decreaseAmount);
+    }
 }
