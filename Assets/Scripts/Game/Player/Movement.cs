@@ -1,4 +1,4 @@
-using Mirror;
+﻿using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -357,10 +357,12 @@ public class Movement : NetworkBehaviour {
 
     private void updateHealthBarPosition() {
         // Set health bar to bottom left
-        float healthBarWidth = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<RectTransform>().sizeDelta.x;
+        healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+
+        float healthBarWidth = healthBar.GetComponent<RectTransform>().sizeDelta.x;
         float hotbarHeight = transform.Find("Hotbar/Background Canvas/Background").GetComponent<RectTransform>().sizeDelta.y;
 
-        GameObject.Find("Health/Health Canvas/Health Bar").transform.position = new Vector3(Screen.width - healthBarWidth / 2, hotbarHeight, 0);
+        healthBar.transform.position = new Vector3(Screen.width - healthBarWidth / 2, hotbarHeight, 0);
     }
 
     public void decreaseHealth(float damage) {
