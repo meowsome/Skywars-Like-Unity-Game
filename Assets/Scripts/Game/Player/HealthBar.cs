@@ -17,6 +17,10 @@ public class HealthBar : MonoBehaviour {
     public void setHealth(float health) {
         this.health = health;
         slider.value = health;
+
+        if (this.health < 0) {
+            GameObject.FindWithTag("Player").GetComponent<StateHandler>().enableSpectatorState();
+        }
     }
 
     public void decreaseHealth(float decreaseAmount) {

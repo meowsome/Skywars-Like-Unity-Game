@@ -92,4 +92,13 @@ public class InventoryManagement : MonoBehaviour {
         activeItemSlot = slot;
         activeItem = GetItemInSlot(slot);
     }
+
+    public void clearInventory() {
+        // Iterate through duplicate of list to prevent errors when removing items from the list
+        List<Item> invTemp = new List<Item>(inventory);
+
+        foreach (Item item in invTemp) {
+            Remove(item.name, 1);
+        }
+    }
 }

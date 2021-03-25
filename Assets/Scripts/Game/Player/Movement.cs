@@ -1,4 +1,4 @@
-﻿using Mirror;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,6 +35,8 @@ public class Movement : NetworkBehaviour {
     private float cooldownAmount = 0.25f;
     private bool cooldownActive = false;
     private MapHandlerClient mapHandler;
+    private StateHandler stateHandler;
+    private bool itemsHidden = false;
 
     void Start() {     
         if (isLocalPlayer && !isServer) {
@@ -59,6 +61,7 @@ public class Movement : NetworkBehaviour {
             healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
 
             mapHandler = transform.GetComponent<MapHandlerClient>();
+            stateHandler = transform.GetComponent<StateHandler>();
         } else if (isServer && !started) {
             Debug.Log("Server started");
             started = true;
@@ -70,26 +73,37 @@ public class Movement : NetworkBehaviour {
             handlePause();
 
             if (!pauseManager.isPaused()) {
-                setHUDItems();
                 handleMovement();
-                handleInventoryInput();
-                KeyPressCooldown();
+
+                if (stateHandler.isPlayerAlive()) {
+                    // If the HUD items were previously hidden by spectator mode, re-enable them
+                    if (itemsHidden) showHUDItems();
+
+                    setHUDItems();
+                    handleInventoryInput();
+                    KeyPressCooldown();
+                    itemsHidden = false;
+                } else {
+                    if (!itemsHidden) {
+                        hideHUDItems();
+                        itemsHidden = true;
+                    }
+                }
             }
         } else hideOtherHotbar();
     }
 
     private void handleMovement() {
-        if (isAtEdgeAndCrouching()) return;
+        if (isAtEdgeAndCrouching() && stateHandler.isPlayerAlive()) return;
 
         move = getHorizontalMovement(); // Set horizontal WASD movement
 
-        if (controller.isGrounded) {
+        if (controller.isGrounded || !stateHandler.isPlayerAlive()) {
             verticalVelocity = getVerticalMovement(); // Set vertical movement for next iteration. 
             move.y = verticalVelocity; // Set vertical movement to what it was before
             
-
             handleCrouch();
-        } else {
+        } else if (stateHandler.isPlayerAlive()) {
             verticalVelocity -= getGravityMovement(); // Set vertical movement to simulate gravity and store for next iteration
             move.y = verticalVelocity; // Set vertical movement to what it was before
         }
@@ -120,7 +134,18 @@ public class Movement : NetworkBehaviour {
     }
 
     private float getVerticalMovement() {
-        return (Input.GetKey(jumpKey)) ? jumpForce : -gravity * Time.deltaTime; // If space bar is pressed, send force upwards. Otherwise, even though the player is on the ground, set vertical movement to simulate gravity. If set to 0, controller.isGrounded does not work
+        // If space bar is pressed, send force upwards. Otherwise, even though the player is on the ground, set vertical movement to simulate gravity. If set to 0, controller.isGrounded does not work
+        if (Input.GetKey(jumpKey)) {
+            return jumpForce;
+        } else {
+            if (stateHandler.isPlayerAlive()) {
+                return -gravity * Time.deltaTime;
+            } else if (Input.GetKey(crouchKey)) {
+                return -jumpForce;
+            } else {
+                return 0;
+            }
+        }
     }
 
     private float getGravityMovement() {
@@ -319,6 +344,15 @@ public class Movement : NetworkBehaviour {
         updateHealthBarPosition();
 
         updateTimerPosition();
+    }
+
+    private void showHUDItems() {
+        GameObject.Find("Health/Health Canvas/Health Bar").SetActive(true);
+    }
+
+    private void hideHUDItems() {
+        inventoryManagement.clearInventory();
+        GameObject.Find("Health/Health Canvas/Health Bar").SetActive(false);
     }
 
     private void updateHealthBarPosition() {
