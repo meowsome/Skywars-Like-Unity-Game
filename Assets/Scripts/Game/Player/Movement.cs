@@ -1,4 +1,4 @@
-﻿using Mirror;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -281,7 +281,7 @@ public class Movement : NetworkBehaviour {
     // Handle picking up items
     void OnTriggerEnter(Collider collider) {
         if (collider.gameObject.tag == "Item") {
-            if (isLocalPlayer) {
+            if (isLocalPlayer && stateHandler.isPlayerAlive()) {
                 string itemName = collider.gameObject.name;
 
                 bool result = inventoryManagement.Add(itemName, 1);
