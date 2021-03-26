@@ -37,6 +37,7 @@ public class Movement : NetworkBehaviour {
     private MapHandlerClient mapHandler;
     private StateHandler stateHandler;
     private bool itemsHidden = false;
+    private float destroyDistance = 500f;
 
     void Start() {     
         if (isLocalPlayer && !isServer) {
@@ -90,6 +91,8 @@ public class Movement : NetworkBehaviour {
                     }
                 }
             }
+
+            checkIfTooFar();
         } else hideOtherHotbar();
     }
 
@@ -372,5 +375,13 @@ public class Movement : NetworkBehaviour {
     public void Hit(string from, float damage) {
         // Decrease health of current user
 
+    }
+
+    // If player is further than defined distance from the center of the map, automatically send player back to center and send them to spectator mode
+    private void checkIfTooFar() {
+        if (Vector3.Distance(transform.position, new Vector3(0, 0, 0)) > destroyDistance) {
+            controller.transform.position = new Vector3(0, 25, 0);
+            stateHandler.enableSpectatorState();
+        }
     }
 }
