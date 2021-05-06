@@ -53,7 +53,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         if (forward.y >= 270) y = yCoordFormula(forward.y, 360, 360 - 270);
         else if (forward.y <= 90) y = yCoordFormula(forward.y, 90, 90 - 0) - 1;
 
-        return new Vector3(forward.x, y, forward.z);
+        return new Vector3(forward.x, y + 0.08f, forward.z); // Add to angle the bullet slightly higher
     }
 
     private float yCoordFormula(float y, float max, float difference) {
