@@ -31,11 +31,12 @@ public class AttackHandlerServer : NetworkBehaviour {
         bullet.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
 
         NetworkServer.Spawn(bullet); // Create on server
-        FireClient(bullet, forward); // Create on all clients
+        FireClient(bullet, forward, spawnPos); // Create on all clients
     }
 
     [ClientRpc]
-    private void FireClient(GameObject obj, Vector3 forward) {
+    private void FireClient(GameObject obj, Vector3 forward, Vector3 spawnPos) {
+        obj.transform.position = spawnPos;
         obj.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
     }
 
