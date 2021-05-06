@@ -25,8 +25,8 @@ public class AttackHandlerServer : NetworkBehaviour {
         // Same rotation as player but rotated 90 degrees to be perpendicular (convert from quaternion, to vector3, then to quaternion again)
         Quaternion rotation = Quaternion.Euler(new Vector3(playerRotation.eulerAngles.x, 90f + playerRotation.eulerAngles.y, playerRotation.eulerAngles.z));
 
-        // Create the game object with specified place & rotation
-        GameObject bullet = Instantiate(bulletPrefab, spawnPos, rotation);
+        // Create the game object with specified place, rotation, & parent
+        GameObject bullet = Instantiate(bulletPrefab, spawnPos, rotation, GameObject.Find("Projectiles").transform);
 
         bullet.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
 
@@ -36,6 +36,7 @@ public class AttackHandlerServer : NetworkBehaviour {
 
     [ClientRpc]
     private void FireClient(GameObject obj, Vector3 forward, Vector3 spawnPos) {
+        obj.transform.SetParent(GameObject.Find("Projectiles").transform); // Set the parent of the bullet to the projectiles
         obj.transform.position = spawnPos;
         obj.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
     }
