@@ -1503,6 +1503,7 @@ GameObject:
   - component: {fileID: 1044577221}
   - component: {fileID: 1044577220}
   - component: {fileID: 1044577219}
+  - component: {fileID: 1044577222}
   m_Layer: 0
   m_Name: MapHandler
   m_TagString: Untagged
@@ -1554,6 +1555,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1044577222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1044577218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dff918d11321f54ab47b7bf0e1f08e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!1 &1057452119
 GameObject:
   m_ObjectHideFlags: 0
@@ -2166,6 +2181,7 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 3565032746386610508, guid: 82436b4548fa8d7498e61d8bb1208e8f, type: 3}
+  - {fileID: 7288631813073343828, guid: e63024186cc6936439f250417620d9a5, type: 3}
 --- !u!4 &1658975012
 Transform:
   m_ObjectHideFlags: 0
