@@ -27,13 +27,11 @@ public class AttackHandler : NetworkBehaviour {
                     // Actually hit the enemy
                     Movement movement = hit.transform.gameObject.GetComponent<Movement>();
                     if (movement) movement.Hit(transform.name, getHitDamage(inventoryManagement.activeItem));
-
-                    // TODO add XP
                 }
             }
         }
 
-        // TODO check for gun shots / projectiles shot
+        // TODO add XP
     }
 
     [Command]
