@@ -25,7 +25,6 @@ public class Movement : NetworkBehaviour {
     private PauseManager pauseManager;
     private KeyCode pauseKey = KeyCode.Escape;
     private HotbarItemUpdates hotbarItemUpdates;
-    private ItemValidator itemValidator;
     private bool started = false;
     private InventoryManagement inventoryManagement;
     private string playerName;
@@ -57,7 +56,6 @@ public class Movement : NetworkBehaviour {
             GameObject.Find("Hotbar").transform.parent = this.transform; // Set as child of player
             setHUDItems();
 
-            itemValidator = new ItemValidator();
             pauseManager = GameObject.Find("Pause").GetComponent<PauseManager>();
             healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
 
@@ -258,12 +256,17 @@ public class Movement : NetworkBehaviour {
     private void HandleDrop() {
         if (inventoryManagement.activeItem != null) {
             mapHandler.CreateItem(transform.position + transform.forward * 3, 1, inventoryManagement.activeItem.name.ToLower()); // Create the dropped item in front of the player
-            inventoryManagement.Remove(inventoryManagement.activeItem.name, 1); // Remove the item from their inventory
-
-            // Update held item to either the next item in the players inventory, or null if none left
-            string itemName = (inventoryManagement.activeItem != null) ? inventoryManagement.activeItem.name : null;
-            UpdateHeldItemForAllUsersServer(playerName, itemName);
+            
+            removeHeldItemFromInventory();
         }
+    }
+
+    public void removeHeldItemFromInventory() {
+        inventoryManagement.Remove(inventoryManagement.activeItem.name, 1); // Remove the item from their inventory
+
+        // Update held item to either the next item in the players inventory, or null if none left
+        string itemName = (inventoryManagement.activeItem != null) ? inventoryManagement.activeItem.name : null;
+        UpdateHeldItemForAllUsersServer(playerName, itemName);
     }
 
     // Spawn player prefab
@@ -287,7 +290,7 @@ public class Movement : NetworkBehaviour {
             if (isLocalPlayer && stateHandler.isPlayerAlive()) {
                 string itemName = collider.gameObject.name;
 
-                bool result = inventoryManagement.Add(itemName, 1);
+                bool result = inventoryManagement.Add(itemName, 1, collider.gameObject.GetComponent<GenericItem>());
 
                 if (result) {
                     // If this is the first item that the user has...
@@ -309,25 +312,34 @@ public class Movement : NetworkBehaviour {
 
     [Command]
     void UpdateHeldItemForAllUsersServer(string playerName, string itemName) {
-        // If item name provided, set held item. Otherwise, set to blank (dropping item)
-        Sprite sprite = GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite;
         if (itemName != null) {
-            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
-        } else {
-            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = null;
-        }
+            // If item name provided, set held item.
+            GameObject heldItemDisplayPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/HeldItems/" + itemName + ".prefab", typeof(GameObject));
+            GameObject heldItemDisplay = Instantiate(heldItemDisplayPrefab);
 
-        UpdateHeldItemForAllUsersClient(playerName, itemName);
+            NetworkServer.Spawn(heldItemDisplay);
+            heldItemDisplay.transform.SetParent(GameObject.FindWithTag("Held Item").transform);
+
+            // Reset transform properties of the held item so that it goes where it's supposed to
+            heldItemDisplay.transform.localPosition = Vector3.zero;
+            heldItemDisplay.transform.localRotation = Quaternion.identity;
+            heldItemDisplay.transform.localScale = Vector3.one;
+
+            UpdateHeldItemForAllUsersClient(heldItemDisplay);
+        } else {
+            // Otherwise, set to blank (dropping item)
+            NetworkServer.Destroy(GameObject.FindWithTag("Held Item Display"));
+        }
     }
 
     [ClientRpc]
-    void UpdateHeldItemForAllUsersClient(string playersName, string itemName) {
-        Sprite sprite = GameObject.Find(playersName + "/Held Item").GetComponent<SpriteRenderer>().sprite;
-        if (itemName != null) {
-            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = (Sprite)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Sprite));
-        } else {
-            GameObject.Find(playerName + "/Held Item").GetComponent<SpriteRenderer>().sprite = null;
-        }
+    void UpdateHeldItemForAllUsersClient(GameObject heldItemDisplay) {
+        heldItemDisplay.transform.SetParent(GameObject.FindWithTag("Held Item").transform);
+
+        // Reset transform properties for all clients too
+        heldItemDisplay.transform.localPosition = Vector3.zero;
+        heldItemDisplay.transform.localRotation = Quaternion.identity;
+        heldItemDisplay.transform.localScale = Vector3.one;
     }
 
     [Command]

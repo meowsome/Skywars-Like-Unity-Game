@@ -8,33 +8,38 @@ public class InventoryManagement : MonoBehaviour {
     public List<Item> inventory = new List<Item>();
     private int stackSize = 100;
     private float width = 0;
-    private ItemValidator itemValidator;
     private HotbarItemUpdates hotbarItemUpdates;
     public int activeItemSlot; // 0 is far right, "max" is far left
     public Item activeItem { get; set; }
+    private int maxInventorySize = 6;
 
     void Start() {
         width = Screen.width;
-        itemValidator = new ItemValidator();
         hotbarItemUpdates = new HotbarItemUpdates();
         activeItemSlot = 0;
     }
 
-    public bool Add(string name, int amount) {
-        Item itemSearchResults = inventory.FirstOrDefault(item => item.name.ToLower() == name.ToLower());
+    public bool Add(string name, int amount, GenericItem newItem) {
+        name = name.ToLower();
+        Item itemSearchResults = inventory.FirstOrDefault(item => item.name.ToLower() == name);
 
         // Add to existing item stack
         if (itemSearchResults != null) {
-            if (itemValidator.isStackable(itemSearchResults) && itemSearchResults.amount + amount <= stackSize) {
+            if (newItem.stackable && itemSearchResults.amount + amount <= stackSize) {
                 itemSearchResults.amount += amount;
                 hotbarItemUpdates.incrementItemInHotbar(itemSearchResults);
                 return true;
             } else return false; // If item found and not stackable, no need to add
-        } else if (inventory.Count < itemValidator.getMaxInventorySize()) {
+        } else if (inventory.Count < maxInventorySize) {
             // Create new item stack
             Item item = new Item {
                 name = name,
-                amount = amount
+                amount = amount,
+                stackable = newItem.stackable,
+                type = newItem.type,
+                hitDamage = newItem.hitDamage,
+                shotDamage = newItem.shotDamage,
+                removeAfterUse = newItem.removeAfterUse
             };
 
             inventory.Add(item);
@@ -49,7 +54,7 @@ public class InventoryManagement : MonoBehaviour {
 
         // Remove from item stack
         if (itemSearchResults != null) {
-            if (itemValidator.isStackable(itemSearchResults)) {
+            if (itemSearchResults.stackable) {
                 // Remove amount from stack
                 itemSearchResults.amount -= amount;
                 

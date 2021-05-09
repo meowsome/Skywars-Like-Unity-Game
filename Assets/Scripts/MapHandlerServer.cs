@@ -34,10 +34,10 @@ public class MapHandlerServer : NetworkBehaviour {
 
     private void createStartingItems() {
         createdStartingItems = true;
-        CreateItemServer(new Vector3(5, 0, 0), 1, "Watergun");
-        CreateItemServer(new Vector3(10, 0, 0), 1, "Watergun");
-        CreateItemServer(new Vector3(15, 0, 0), 1, "Watergun");
-        CreateItemServer(new Vector3(20, 0, 0), 1, "Watergun");
+        CreateItemServer(new Vector3(5, 0, 0), 1, "watergun");
+        CreateItemServer(new Vector3(10, 0, 0), 1, "watergun");
+        CreateItemServer(new Vector3(15, 0, 0), 1, "watergun");
+        CreateItemServer(new Vector3(20, 0, 0), 1, "watergun");
     }
 
     IEnumerator UpdateTimer(float updateInterval) {
@@ -125,8 +125,8 @@ public class MapHandlerServer : NetworkBehaviour {
             // tie
         }
         
-        //Show users on pedestal
-        //Wait 30 seconds
+        // todo Show users on pedestal
+        // todo Wait 30 seconds
 
         ResetGame();
     }
@@ -150,15 +150,12 @@ public class MapHandlerServer : NetworkBehaviour {
 
         for(i = 0; i < amount; i++) {
             // Get item prefab and get texture for it
-            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/item.prefab", typeof(GameObject));
+            GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/DroppedItems/" + itemName + ".prefab", typeof(GameObject));
             
             GameObject item = Instantiate(prefab, pos, Quaternion.identity);
 
             item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
             item.name = itemName;
-
-            Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
-            item.GetComponent<RawImage>().texture = texture;
 
             NetworkServer.Spawn(item);
 
@@ -172,8 +169,5 @@ public class MapHandlerServer : NetworkBehaviour {
         item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
         item.name = itemName;
         item.transform.position = pos;
-
-        Texture texture = (Texture)AssetDatabase.LoadAssetAtPath("Assets/Images/" + itemName.ToLower() + ".png", typeof(Texture));
-        item.GetComponent<RawImage>().texture = texture;
     }
 }

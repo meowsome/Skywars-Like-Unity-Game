@@ -8,6 +8,7 @@ TagManager:
   - Watergun
   - Held Item
   - BulletSpawn
+  - Held Item Display
   layers:
   - Default
   - TransparentFX

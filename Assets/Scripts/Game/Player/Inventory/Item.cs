@@ -10,4 +10,20 @@
     public bool stackable {
         get; set;
     }
+
+    public string type {
+        get; set;
+    }
+
+    public float hitDamage {
+        get; set;
+    }
+
+    public float shotDamage {
+        get; set;
+    }
+
+    public bool removeAfterUse {
+        get; set;
+    }
 }
