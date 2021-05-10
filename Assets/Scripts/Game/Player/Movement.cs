@@ -27,7 +27,6 @@ public class Movement : NetworkBehaviour {
     private HotbarItemUpdates hotbarItemUpdates;
     private bool started = false;
     private InventoryManagement inventoryManagement;
-    private string playerName;
     private HealthBar healthBar;
     private KeyCode dropKey = KeyCode.Q;
     private float cooldown = 0;
@@ -45,7 +44,7 @@ public class Movement : NetworkBehaviour {
 
             // Set the name of the player's game object
             GameObject playerObject = GameObject.FindWithTag("Player");
-            playerName = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
+            string playerName = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
             ChangePlayerGameObjectNameServer(playerObject.name, playerName);
 
             inventoryManagement = gameObject.GetComponent<InventoryManagement>();
@@ -228,7 +227,7 @@ public class Movement : NetworkBehaviour {
 
             Item item = inventoryManagement.GetItemInSlot(activeItemSlot);
             hotbarItemUpdates.highlightCurrentHotbarSlot(transform, activeItemSlot, item);
-            UpdateHeldItemForAllUsersServer(playerName, item.name);
+            UpdateHeldItemForAllUsersServer(item.name);
         }
 
         // If drop key pressed, remove active item
@@ -266,7 +265,7 @@ public class Movement : NetworkBehaviour {
 
         // Update held item to either the next item in the players inventory, or null if none left
         string itemName = (inventoryManagement.activeItem != null) ? inventoryManagement.activeItem.name : null;
-        UpdateHeldItemForAllUsersServer(playerName, itemName);
+        UpdateHeldItemForAllUsersServer(itemName);
     }
 
     // Spawn player prefab
@@ -295,7 +294,7 @@ public class Movement : NetworkBehaviour {
                 if (result) {
                     // If this is the first item that the user has...
                     if (inventoryManagement.InventoryCount() == 1) {
-                        UpdateHeldItemForAllUsersServer(playerName, itemName); // Update held item cuz user have to hold it. Otherwise, don't need to update held item
+                        UpdateHeldItemForAllUsersServer(itemName); // Update held item cuz user have to hold it. Otherwise, don't need to update held item
                         inventoryManagement.setActiveItemSlot(0);
                     }
 
@@ -311,7 +310,17 @@ public class Movement : NetworkBehaviour {
     }
 
     [Command]
-    void UpdateHeldItemForAllUsersServer(string playerName, string itemName) {
+    void UpdateHeldItemForAllUsersServer(string itemName) {
+        GameObject heldItemDisplayOriginal = GameObject.FindWithTag("Held Item Display");
+        if (heldItemDisplayOriginal != null) {
+            // If held item display already exists. Use Contains() because the held item display's name includes "(Clone)" at the end
+            if (itemName != null && heldItemDisplayOriginal.name.ToLower().Contains(itemName.ToLower())) return; // If adding a new item and the item is the same as it already is, just ignore
+            else {
+                // If the item is different, destroy it to get ready for the new one incoming. If nothing's incoming, this acts as removing the held item display.
+                NetworkServer.Destroy(heldItemDisplayOriginal);
+            }
+        }
+        
         if (itemName != null) {
             // If item name provided, set held item.
             GameObject heldItemDisplayPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/HeldItems/" + itemName + ".prefab", typeof(GameObject));
@@ -326,9 +335,6 @@ public class Movement : NetworkBehaviour {
             heldItemDisplay.transform.localScale = Vector3.one;
 
             UpdateHeldItemForAllUsersClient(heldItemDisplay);
-        } else {
-            // Otherwise, set to blank (dropping item)
-            NetworkServer.Destroy(GameObject.FindWithTag("Held Item Display"));
         }
     }
 
