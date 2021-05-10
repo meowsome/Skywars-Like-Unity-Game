@@ -29,9 +29,7 @@ public class Movement : NetworkBehaviour {
     private InventoryManagement inventoryManagement;
     private HealthBar healthBar;
     private KeyCode dropKey = KeyCode.Q;
-    private float cooldown = 0;
-    private float cooldownAmount = 0.25f;
-    private bool cooldownActive = false;
+    private Cooldowns cooldowns = new Cooldowns();
     private MapHandlerClient mapHandler;
     private StateHandler stateHandler;
     private bool itemsHidden = false;
@@ -79,7 +77,7 @@ public class Movement : NetworkBehaviour {
 
                     setHUDItems();
                     handleInventoryInput();
-                    KeyPressCooldown();
+                    cooldowns.updateCooldowns();
                     itemsHidden = false;
                 } else {
                     if (!itemsHidden) {
@@ -231,23 +229,9 @@ public class Movement : NetworkBehaviour {
         }
 
         // If drop key pressed, remove active item
-        if (Input.GetKey(dropKey) && !cooldownActive) {
-            cooldown = cooldownAmount;
-            cooldownActive = true;
+        if (Input.GetKey(dropKey) && !cooldowns.cooldownKeypressActive) {
+            cooldowns.startKeypressCooldown();
             HandleDrop();
-        }
-    }
-
-    private void KeyPressCooldown() {
-        // Decrease cooldown
-        if (cooldownActive && cooldown > 0) {
-            cooldown -= Time.deltaTime;
-        }
-
-        // If below zero, stpo cooldown.
-        if (cooldown < 0) {
-            cooldown = 0;
-            cooldownActive = false;
         }
     }
 
@@ -283,10 +267,12 @@ public class Movement : NetworkBehaviour {
         GameObject.Find(timerPath).transform.position = new Vector3(Screen.width - 50, Screen.height - 50, 0);
     }
 
-    // Handle picking up items
-    void OnTriggerEnter(Collider collider) {
+    // Handle picking up items, detects every frame that player touches an item
+    void OnTriggerStay(Collider collider) {
         if (collider.gameObject.tag == "Item") {
-            if (isLocalPlayer && stateHandler.isPlayerAlive()) {
+            if (!cooldowns.cooldownInteractActive && isLocalPlayer && stateHandler.isPlayerAlive()) {
+                cooldowns.startInteractCooldown();
+
                 string itemName = collider.gameObject.name;
 
                 bool result = inventoryManagement.Add(itemName, 1, collider.gameObject.GetComponent<GenericItem>());

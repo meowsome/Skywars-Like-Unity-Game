@@ -8,6 +8,7 @@ using UnityEditor;
 public class AttackHandler : NetworkBehaviour {
     private InventoryManagement inventoryManagement;
     private ItemUseHandler itemUseHandler;
+    private Cooldowns cooldowns = new Cooldowns();
 
     void Start() {
         inventoryManagement = gameObject.GetComponent<InventoryManagement>();
@@ -15,20 +16,26 @@ public class AttackHandler : NetworkBehaviour {
     }
 
     void Update() {
-        // On right click
-        if (Input.GetMouseButtonDown(1)) {
-            useItem(true);
-        }
+        if (!cooldowns.cooldownInteractActive) {
+            // On right click
+            if (Input.GetMouseButtonDown(1)) {
+                useItem(true);
+            }
 
-        // On left click
-        if (Input.GetMouseButton(0)) {
-            useItem(false);
+            // On left click
+            if (Input.GetMouseButton(0)) {
+                useItem(false);
+            }
         }
+        
+        cooldowns.updateCooldowns();
 
         // TODO add XP
     }
 
     private void useItem(bool rightClick) {
+        cooldowns.startInteractCooldown();
+        
         GameObject heldItemDisplay = GameObject.FindWithTag("Held Item Display");
 
         if (inventoryManagement.activeItem != null && heldItemDisplay != null) {
