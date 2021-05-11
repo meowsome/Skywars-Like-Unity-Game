@@ -33,6 +33,18 @@ public class GenericItem : NetworkBehaviour {
         get; set;
     }
 
+    public float accuracy {
+        get; set;
+    }
+
+    public float damage {
+        get; set;
+    }
+
+    public float reload {
+        get; set; // Reload time in seconds
+    }
+
     public virtual bool use() {
         return false;
     }

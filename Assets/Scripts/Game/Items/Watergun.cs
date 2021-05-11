@@ -13,6 +13,9 @@ public class Watergun : GenericItem {
         hitDamage = 20;
         shotDamage = 25;
         removeAfterUse = false;
+        accuracy = 3f;
+        damage = 5f;
+        reload = 1f; // 1 sec
     }
 
     public override bool use() {
