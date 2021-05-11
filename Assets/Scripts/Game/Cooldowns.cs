@@ -12,6 +12,14 @@ public class Cooldowns {
     private float cooldownInteractAmount = 0.075f;
     public bool cooldownInteractActive {get; set;} = false;
 
+    // Constructor with optional amount, used for item reload times
+    public Cooldowns(float amount = 0f) {
+        // If amount is not null, overwrite default values
+        if (amount == 0f) return;
+        cooldownKeypressAmount = amount;
+        cooldownInteractAmount = amount;
+    }
+
     public void updateCooldowns() {
         // Decrease cooldown
         if (cooldownKeypressActive && cooldownKeypress > 0) {

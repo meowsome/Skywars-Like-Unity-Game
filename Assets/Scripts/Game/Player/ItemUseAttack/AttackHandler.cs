@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
@@ -9,6 +9,7 @@ public class AttackHandler : NetworkBehaviour {
     private InventoryManagement inventoryManagement;
     private ItemUseHandler itemUseHandler;
     private Cooldowns cooldowns = new Cooldowns();
+    private Cooldowns itemReload;
 
     void Start() {
         inventoryManagement = gameObject.GetComponent<InventoryManagement>();
@@ -16,7 +17,8 @@ public class AttackHandler : NetworkBehaviour {
     }
 
     void Update() {
-        if (!cooldowns.cooldownInteractActive) {
+        // If overall cooldown isn't active AND item reload doesn't exis OR item reload isn't active
+        if (!cooldowns.cooldownInteractActive && (itemReload == null || !itemReload.cooldownInteractActive)) {
             // On right click
             if (Input.GetMouseButtonDown(1)) {
                 useItem(true);
@@ -29,6 +31,7 @@ public class AttackHandler : NetworkBehaviour {
         }
         
         cooldowns.updateCooldowns();
+        if (itemReload != null) itemReload.updateCooldowns();
 
         // TODO add XP
     }
@@ -41,7 +44,13 @@ public class AttackHandler : NetworkBehaviour {
         if (inventoryManagement.activeItem != null && heldItemDisplay != null) {
             string itemNameWithCapitilization = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(inventoryManagement.activeItem.name.ToLower());
 
-            itemUseHandler.useItem(heldItemDisplay.GetComponent(itemNameWithCapitilization) as GenericItem, rightClick);
+            GenericItem item = heldItemDisplay.GetComponent(itemNameWithCapitilization) as GenericItem;
+
+            // Activate the reload time for this item
+            if (item.reload) itemReload = new Cooldowns(item.reload);
+            itemReload.startInteractCooldown();
+
+            itemUseHandler.useItem(item, rightClick);
         }
     }
 
