@@ -41,7 +41,7 @@ public class AttackHandler : NetworkBehaviour {
         if (inventoryManagement.activeItem != null && heldItemDisplay != null) {
             string itemNameWithCapitilization = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(inventoryManagement.activeItem.name.ToLower());
 
-            itemUseHandler.useItem(heldItemDisplay.GetComponent(itemNameWithCapitilization) as GenericItem, true);
+            itemUseHandler.useItem(heldItemDisplay.GetComponent(itemNameWithCapitilization) as GenericItem, rightClick);
         }
     }
 
