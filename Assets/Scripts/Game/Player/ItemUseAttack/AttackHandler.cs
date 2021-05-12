@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
@@ -46,11 +46,13 @@ public class AttackHandler : NetworkBehaviour {
 
             GenericItem item = heldItemDisplay.GetComponent(itemNameWithCapitilization) as GenericItem;
 
-            // Activate the reload time for this item
-            if (item.reload) itemReload = new Cooldowns(item.reload);
-            itemReload.startInteractCooldown();
+            if (item != null) {
+                // Activate the reload time for this item
+                itemReload = new Cooldowns(item.reload);
+                itemReload.startInteractCooldown();
 
-            itemUseHandler.useItem(item, rightClick);
+                itemUseHandler.useItem(item, rightClick);
+            }
         }
     }
 
