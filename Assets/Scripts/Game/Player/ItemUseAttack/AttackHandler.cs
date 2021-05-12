@@ -57,7 +57,7 @@ public class AttackHandler : NetworkBehaviour {
     }
 
     [Command]
-    public void Fire(Vector3 bulletSpawnPos, Vector3 forward, Quaternion playerRotation) {
-        GameObject.Find("MapHandler").GetComponent<AttackHandlerServer>().FireServer(bulletSpawnPos, forward, playerRotation);
+    public void Fire(Vector3 bulletSpawnPos, Vector3 forward, Quaternion playerRotation, float accuracy, float damage) {
+        GameObject.Find("MapHandler").GetComponent<AttackHandlerServer>().FireServer(bulletSpawnPos, forward, playerRotation, accuracy, damage);
     }
 }

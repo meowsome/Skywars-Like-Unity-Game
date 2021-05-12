@@ -33,6 +33,7 @@ public class GenericItem : NetworkBehaviour {
         get; set;
     }
 
+    // Accuracy adds a random skew between 0 and the given number in degrees each shot. The closer to 0, the more accurate it is. 
     public float accuracy {
         get; set;
     }

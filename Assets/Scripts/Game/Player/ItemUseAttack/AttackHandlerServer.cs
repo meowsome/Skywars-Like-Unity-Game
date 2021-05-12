@@ -9,15 +9,16 @@ using System.Collections.Generic;
 
 public class AttackHandlerServer : NetworkBehaviour {
     private GameObject bulletPrefab;
-    private float bulletSpeed = 2000;
+    private float bulletSpeed = 5000;
+    private System.Random random = new System.Random(); // Need to declare random variable here so that it uses the same seed and doesn't repeat the same results
 
     void Start() {
         bulletPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/bullet.prefab", typeof(GameObject));
     }
 
-    public void FireServer(Vector3 pos, Vector3 forward, Quaternion playerRotation) {
+    public void FireServer(Vector3 pos, Vector3 forward, Quaternion playerRotation, float accuracy, float damage) {
         // Update "foward" so y rotation is valid
-        forward = getBulletRotation(forward);
+        forward = getBulletRotation(forward, accuracy);
         
         // Also create on server...
         Vector3 spawnPos = pos + forward * 2;
@@ -47,7 +48,7 @@ public class AttackHandlerServer : NetworkBehaviour {
          NetworkServer.Destroy(bullet);
     }
 
-    private Vector3 getBulletRotation(Vector3 forward) {
+    private Vector3 getBulletRotation(Vector3 forward, float accuracy) {
         // If 270-360, looking upwards where 270 is up and 360 is out
         // If 0-90, looking downwards where 90 is down and 0 is out
         // Actual nums: -1 = down, 0 = straight, 1 = up
@@ -55,10 +56,20 @@ public class AttackHandlerServer : NetworkBehaviour {
         if (forward.y >= 270) y = yCoordFormula(forward.y, 360, 360 - 270);
         else if (forward.y <= 90) y = yCoordFormula(forward.y, 90, 90 - 0) - 1;
 
-        return new Vector3(forward.x, y + 0.08f, forward.z); // Add to angle the bullet slightly higher
+        float randomAccuracyX = randomAccuracySkew(accuracy);
+        float randomAccuracyY = randomAccuracySkew(accuracy);
+        float randomAccuracyZ = randomAccuracySkew(accuracy);
+
+        return new Vector3(forward.x + randomAccuracyX, y + 0.08f + randomAccuracyY, forward.z + randomAccuracyZ); // Add to angle the bullet slightly higher, add to all directions to make it randomized accuracy
     }
 
     private float yCoordFormula(float y, float max, float difference) {
         return (max - y) / difference;
+    }
+
+    // Get random float between -accuracy and +accuracy to add to rotation to make it higher chance of failure
+    private float randomAccuracySkew(float accuracy) {
+        float min = -accuracy; // Set min as negative of max
+        return (float) random.NextDouble() * (accuracy - min) + min;
     }
 }
