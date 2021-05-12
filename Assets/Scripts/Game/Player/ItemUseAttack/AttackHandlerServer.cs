@@ -30,6 +30,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, rotation, GameObject.Find("Projectiles").transform);
 
         bullet.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
+        bullet.GetComponent<BulletBehavior>().sender = GameObject.FindWithTag("Player").name; // Set the sender of the bullet to the current player's name
 
         NetworkServer.Spawn(bullet); // Create on server
         FireClient(bullet, forward, spawnPos); // Create on all clients
@@ -40,6 +41,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         obj.transform.SetParent(GameObject.Find("Projectiles").transform); // Set the parent of the bullet to the projectiles
         obj.transform.position = spawnPos;
         obj.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
+        obj.GetComponent<BulletBehavior>().sender = GameObject.FindWithTag("Player").name; // Set the sender of the bullet to the current player's name
     }
 
     private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay) {

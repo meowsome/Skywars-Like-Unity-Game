@@ -5,6 +5,7 @@ using Mirror;
 
 public class BulletBehavior : NetworkBehaviour {
     private float destroyDistance = 500f;
+    public string sender { get; set; }
 
     void Update() {
         checkIfTooFar();
