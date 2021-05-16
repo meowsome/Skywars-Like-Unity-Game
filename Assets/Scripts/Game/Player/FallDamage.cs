@@ -8,7 +8,7 @@ using System;
 
 public class FallDamage : NetworkBehaviour {
     private CharacterController controller;
-    private HealthBar healthBar;
+    private HealthBehavior healthBehavior;
     bool fallen = false;
     float damage = 0;
     float pos = 0;
@@ -16,7 +16,7 @@ public class FallDamage : NetworkBehaviour {
     void Start() {
         if (isLocalPlayer) {
             this.controller = GetComponent<CharacterController>();
-            this.healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+            this.healthBehavior = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>();
             pos = controller.transform.position.y;
         }
     }
@@ -32,7 +32,7 @@ public class FallDamage : NetworkBehaviour {
 
                 // If player has been falling for 0.5 seconds and has fallen more than 5 units
                 if (damage > 0.5 && pos - controller.transform.position.y > 5) {
-                    healthBar.decreaseHealth((float) Math.Pow(1 + damage, 6));
+                    healthBehavior.decreaseHealth((float) Math.Pow(1 + damage, 6));
                 }
 
                 fallen = false;

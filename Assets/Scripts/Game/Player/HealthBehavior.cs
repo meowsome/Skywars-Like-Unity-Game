@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBar : MonoBehaviour {
+public class HealthBehavior : MonoBehaviour {
     private float maxHealth = 100.0f;
     private Slider slider;
     public float health;

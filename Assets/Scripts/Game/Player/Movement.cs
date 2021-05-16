@@ -27,7 +27,7 @@ public class Movement : NetworkBehaviour {
     private HotbarItemUpdates hotbarItemUpdates;
     private bool started = false;
     private InventoryManagement inventoryManagement;
-    private HealthBar healthBar;
+    private HealthBehavior healthBehavior;
     private KeyCode dropKey = KeyCode.Q;
     private Cooldowns cooldowns = new Cooldowns();
     private MapHandlerClient mapHandler;
@@ -54,7 +54,7 @@ public class Movement : NetworkBehaviour {
             setHUDItems();
 
             pauseManager = GameObject.Find("Pause").GetComponent<PauseManager>();
-            healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+            healthBehavior = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>();
 
             mapHandler = transform.GetComponent<MapHandlerClient>();
             stateHandler = transform.GetComponent<StateHandler>();
@@ -364,16 +364,16 @@ public class Movement : NetworkBehaviour {
 
     private void updateHealthBarPosition() {
         // Set health bar to bottom left
-        healthBar = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBar>();
+        healthBehavior = GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>();
 
-        float healthBarWidth = healthBar.GetComponent<RectTransform>().sizeDelta.x;
+        float healthBarWidth = healthBehavior.GetComponent<RectTransform>().sizeDelta.x;
         float hotbarHeight = transform.Find("Hotbar/Background Canvas/Background").GetComponent<RectTransform>().sizeDelta.y;
 
-        healthBar.transform.position = new Vector3(Screen.width - healthBarWidth / 2, hotbarHeight, 0);
+        healthBehavior.transform.position = new Vector3(Screen.width - healthBarWidth / 2, hotbarHeight, 0);
     }
 
     public void decreaseHealth(float damage) {
-        healthBar.setHealth(healthBar.health - damage);
+        healthBehavior.setHealth(healthBehavior.health - damage);
     }
 
     public void Hit(string from, float damage) {
