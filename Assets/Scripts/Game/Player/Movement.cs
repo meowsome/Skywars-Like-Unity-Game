@@ -372,15 +372,6 @@ public class Movement : NetworkBehaviour {
         healthBehavior.transform.position = new Vector3(Screen.width - healthBarWidth / 2, hotbarHeight, 0);
     }
 
-    public void decreaseHealth(float damage) {
-        healthBehavior.setHealth(healthBehavior.health - damage);
-    }
-
-    public void Hit(string from, float damage) {
-        // Decrease health of current user
-
-    }
-
     // If player is further than defined distance from the center of the map, automatically send player back to center and send them to spectator mode
     private void checkIfTooFar() {
         if (Vector3.Distance(transform.position, new Vector3(0, 0, 0)) > destroyDistance) {

@@ -44,13 +44,13 @@ public class ItemUseHandler : MonoBehaviour {
         }
     }
 
-    private void meleeAttack(GenericItem item) {
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 5f)) {
-            if (hit.transform.tag == "Player") {
-                // Actually hit the enemy
-                Movement movement = hit.transform.gameObject.GetComponent<Movement>();
-                if (movement) movement.Hit(transform.name, item.hitDamage);
-            }
-        }
-    }
+    // private void meleeAttack(GenericItem item) {
+    //     if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit, 5f)) {
+    //         if (hit.transform.tag == "Player") {
+    //             // Actually hit the enemy
+    //             Movement movement = hit.transform.gameObject.GetComponent<Movement>();
+    //             if (movement) movement.Hit(transform.name, item.hitDamage);
+    //         }
+    //     }
+    // }
 }
