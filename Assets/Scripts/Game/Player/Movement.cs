@@ -41,9 +41,10 @@ public class Movement : NetworkBehaviour {
             move = new Vector3(0, 0, 0);
 
             // Set the name of the player's game object
-            GameObject playerObject = GameObject.FindWithTag("Player");
             string playerName = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
-            ChangePlayerGameObjectNameServer(playerObject.name, playerName);
+            ChangePlayerGameObjectNameServer(gameObject.name, playerName);
+
+            GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>().setPlayer = playerName; // Set the name of the new player to the health behavior, for this client ONLY (not server, not other clients)
 
             inventoryManagement = gameObject.GetComponent<InventoryManagement>();
             
@@ -297,7 +298,10 @@ public class Movement : NetworkBehaviour {
 
     [Command]
     void UpdateHeldItemForAllUsersServer(string itemName) {
-        GameObject heldItemDisplayOriginal = GameObject.FindWithTag("Held Item Display");
+        GameObject heldItemDisplayOriginal = null;
+        //https://answers.unity.com/questions/47989/is-it-possible-to-findwithtag-only-within-children.html
+        foreach (Transform child in transform.Find("Held Item")) if (child.CompareTag("Held Item Display")) heldItemDisplayOriginal = child.gameObject;
+
         if (heldItemDisplayOriginal != null) {
             // If held item display already exists. Use Contains() because the held item display's name includes "(Clone)" at the end
             if (itemName != null && heldItemDisplayOriginal.name.ToLower().Contains(itemName.ToLower())) return; // If adding a new item and the item is the same as it already is, just ignore
@@ -313,7 +317,7 @@ public class Movement : NetworkBehaviour {
             GameObject heldItemDisplay = Instantiate(heldItemDisplayPrefab);
 
             NetworkServer.Spawn(heldItemDisplay);
-            heldItemDisplay.transform.SetParent(GameObject.FindWithTag("Held Item").transform);
+            heldItemDisplay.transform.SetParent(transform.Find("Held Item"));
 
             // Reset transform properties of the held item so that it goes where it's supposed to
             heldItemDisplay.transform.localPosition = Vector3.zero;
@@ -326,7 +330,7 @@ public class Movement : NetworkBehaviour {
 
     [ClientRpc]
     void UpdateHeldItemForAllUsersClient(GameObject heldItemDisplay) {
-        heldItemDisplay.transform.SetParent(GameObject.FindWithTag("Held Item").transform);
+        heldItemDisplay.transform.SetParent(transform.Find("Held Item"));
 
         // Reset transform properties for all clients too
         heldItemDisplay.transform.localPosition = Vector3.zero;

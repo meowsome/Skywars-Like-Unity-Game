@@ -30,7 +30,7 @@ public class HealthBehavior : MonoBehaviour {
         slider.value = health;
 
         if (this.health < 0) {
-            GameObject.FindWithTag("Player").GetComponent<StateHandler>().enableSpectatorState();
+            playerGameObject.GetComponent<StateHandler>().enableSpectatorState();
         }
     }
 

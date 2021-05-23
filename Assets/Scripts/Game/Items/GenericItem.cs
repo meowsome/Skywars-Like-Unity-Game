@@ -10,7 +10,8 @@ public class GenericItem : NetworkBehaviour {
     
     // "protected virtual" means that this start method will be run by an inherited class later
     protected virtual void Start() {
-        attackHandler = GameObject.FindWithTag("Player").GetComponent<AttackHandler>();
+        // Get the attack handler for the specific player who is holding this item
+        attackHandler = transform.parent.transform.parent.GetComponent<AttackHandler>();
     }
 
     public string type {

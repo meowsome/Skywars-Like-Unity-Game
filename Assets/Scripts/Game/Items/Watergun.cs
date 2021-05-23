@@ -19,10 +19,11 @@ public class Watergun : GenericItem {
     }
 
     public override bool use() {
-        Transform playerTransform = GameObject.FindWithTag("Player").transform;
+        Transform playerTransform = transform.parent.transform.parent.transform;
         Vector3 forwardWithVerticalRotation = new Vector3(playerTransform.forward.x, Camera.main.transform.eulerAngles.x, playerTransform.forward.z);
 
-        Vector3 bulletSpawnPos = GameObject.FindWithTag("BulletSpawn").transform.position; // The location where the bullet will be spawned, constantly tracked by the client and sent to the server when it's time for it to be spawned
+        Vector3 bulletSpawnPos = transform.parent.Find("BulletSpawn").transform.position;
+        foreach (Transform child in transform) if (child.CompareTag("BulletSpawn")) bulletSpawnPos = child.position; // The location where the bullet will be spawned, constantly tracked by the client and sent to the server when it's time for it to be spawned (https://answers.unity.com/questions/47989/is-it-possible-to-findwithtag-only-within-children.html)
         attackHandler.Fire(bulletSpawnPos, forwardWithVerticalRotation, playerTransform.rotation, accuracy, damage); // Specify damage, speed, accuracy here
         return true;
     }

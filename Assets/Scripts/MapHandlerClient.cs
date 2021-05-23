@@ -29,7 +29,7 @@ public class MapHandlerClient : NetworkBehaviour {
             SyncPlayersList(players);
 
             // Send to the MapHandlerServer
-            GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().map.players = players;
+            GameObject.FindWithTag("MapHandler").GetComponent<MapHandlerServer>().map.players = players;
         }
     }
 
@@ -69,13 +69,13 @@ public class MapHandlerClient : NetworkBehaviour {
     // This code is run on server. Client told server to send it a new timer.
     [Command]
     void CmdSyncVarWithClients() {
-        float newTimer = GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().map.timer; // Get new timer from the MapHandlerServer class, which only server has access to
+        float newTimer = GameObject.FindWithTag("MapHandler").GetComponent<MapHandlerServer>().map.timer; // Get new timer from the MapHandlerServer class, which only server has access to
         RpcSyncVarWithClients(newTimer);
     }
 
     // Player needs to create new item, tell server to make it
     [Command]
     public void CreateItem(Vector3 pos, int amount, string itemName) {
-        GameObject.Find("MapHandler").GetComponent<MapHandlerServer>().CreateItemServer(pos, amount, itemName);
+        GameObject.FindWithTag("MapHandler").GetComponent<MapHandlerServer>().CreateItemServer(pos, amount, itemName);
     }
 }

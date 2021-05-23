@@ -39,8 +39,11 @@ public class AttackHandler : NetworkBehaviour {
     private void useItem(bool rightClick) {
         cooldowns.startInteractCooldown();
         
-        GameObject heldItemDisplay = GameObject.FindWithTag("Held Item Display");
-
+        Transform heldItemDisplay = getHeldItemDisplay();
+        
+        Vector3 bulletSpawnPos = Vector3.zero;
+        if (heldItemDisplay != null) bulletSpawnPos = heldItemDisplay.position;
+        
         if (inventoryManagement.activeItem != null && heldItemDisplay != null) {
             string itemNameWithCapitilization = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(inventoryManagement.activeItem.name.ToLower());
 
@@ -50,14 +53,21 @@ public class AttackHandler : NetworkBehaviour {
                 // Activate the reload time for this item
                 itemReload = new Cooldowns(item.reload);
                 itemReload.startInteractCooldown();
-
                 itemUseHandler.useItem(item, rightClick);
             }
         }
     }
 
+    private Transform getHeldItemDisplay() {
+        foreach (Transform child in transform.Find("Held Item")) {
+            if (child.CompareTag("Held Item Display")) return child;
+        }
+
+        return null;
+    }
+
     [Command]
     public void Fire(Vector3 bulletSpawnPos, Vector3 forward, Quaternion playerRotation, float accuracy, float damage) {
-        GameObject.Find("MapHandler").GetComponent<AttackHandlerServer>().FireServer(bulletSpawnPos, forward, playerRotation, accuracy, damage);
+        GameObject.FindWithTag("MapHandler").GetComponent<AttackHandlerServer>().FireServer(bulletSpawnPos, forward, playerRotation, accuracy, damage, gameObject.name);
     }
 }
