@@ -7,6 +7,17 @@ public class HealthBehavior : MonoBehaviour {
     private float maxHealth = 100.0f;
     private Slider slider;
     public float health;
+    private GameObject playerGameObject;
+    public string name;
+    public string setPlayer {
+        get {
+            return this.playerGameObject.name;
+        }
+        set {
+            this.playerGameObject = GameObject.Find(value);
+            this.name = value;
+        }
+    }
 
     void Start() {
         health = maxHealth;

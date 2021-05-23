@@ -9,6 +9,7 @@ TagManager:
   - Held Item
   - BulletSpawn
   - Held Item Display
+  - MapHandler
   layers:
   - Default
   - TransparentFX

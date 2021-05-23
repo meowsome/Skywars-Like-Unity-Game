@@ -5,7 +5,13 @@ using Mirror;
 
 public class BulletBehavior : NetworkBehaviour {
     private float destroyDistance = 500f;
+    public float damage { get; set; }
     public string sender { get; set; }
+    private DamageHandler damageHandler;
+
+    void Start() {
+        damageHandler = GameObject.Find("DamageHandler").GetComponent<DamageHandler>();
+    }
 
     void Update() {
         checkIfTooFar();
@@ -13,8 +19,15 @@ public class BulletBehavior : NetworkBehaviour {
 
     // Handle collision, destroy bullet
     private void OnTriggerEnter(Collider collider) {
+        // Only allow collision if hasn't collided with anything else yet
         Debug.Log("hit " + collider.name);
+        
         NetworkServer.Destroy(gameObject);
+        
+        // If bullet hit player, damage player
+        if (collider.gameObject.tag == "Player") {
+            damageHandler.damagePlayer(sender, collider.gameObject.name, damage);
+        }
     }
 
     // If bullet travels further than defined distance from the center of the map, destroy

@@ -16,7 +16,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         bulletPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/bullet.prefab", typeof(GameObject));
     }
 
-    public void FireServer(Vector3 pos, Vector3 forward, Quaternion playerRotation, float accuracy, float damage) {
+    public void FireServer(Vector3 pos, Vector3 forward, Quaternion playerRotation, float accuracy, float damage, string senderName) {
         // Update "foward" so y rotation is valid
         forward = getBulletRotation(forward, accuracy);
         
@@ -30,18 +30,24 @@ public class AttackHandlerServer : NetworkBehaviour {
         GameObject bullet = Instantiate(bulletPrefab, spawnPos, rotation, GameObject.Find("Projectiles").transform);
 
         bullet.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
-        bullet.GetComponent<BulletBehavior>().sender = GameObject.FindWithTag("Player").name; // Set the sender of the bullet to the current player's name
+        
+        // Set the sender and damage amount of the bullet
+        bullet.GetComponent<BulletBehavior>().damage = damage;
+        bullet.GetComponent<BulletBehavior>().sender = senderName;
 
         NetworkServer.Spawn(bullet); // Create on server
-        FireClient(bullet, forward, spawnPos); // Create on all clients
+        FireClient(bullet, forward, spawnPos, senderName, damage); // Create on all clients
     }
 
     [ClientRpc]
-    private void FireClient(GameObject obj, Vector3 forward, Vector3 spawnPos) {
+    private void FireClient(GameObject obj, Vector3 forward, Vector3 spawnPos, string senderName, float damage) {
         obj.transform.SetParent(GameObject.Find("Projectiles").transform); // Set the parent of the bullet to the projectiles
         obj.transform.position = spawnPos;
         obj.GetComponent<Rigidbody>().AddForce(forward * bulletSpeed); // Apply force to bullet
-        obj.GetComponent<BulletBehavior>().sender = GameObject.FindWithTag("Player").name; // Set the sender of the bullet to the current player's name
+
+        // Set the sender and damage amount of the bullet
+        obj.GetComponent<BulletBehavior>().damage = damage;
+        obj.GetComponent<BulletBehavior>().sender = senderName;
     }
 
     private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay) {
