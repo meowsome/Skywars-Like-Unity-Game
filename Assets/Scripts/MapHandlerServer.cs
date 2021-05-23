@@ -25,6 +25,11 @@ public class MapHandlerServer : NetworkBehaviour {
         }
     }
 
+    [ClientRpc]
+    void ChangePlayerGameObjectNameClient(string oldName, string newName) {
+        GameObject.Find(oldName).name = newName;
+    }
+
     void Update() {
         // If a player has joined and starting items have not been created yet, create them
         if (isServer && map.players.Count > 0 && !createdStartingItems) {
@@ -38,6 +43,23 @@ public class MapHandlerServer : NetworkBehaviour {
         CreateItemServer(new Vector3(10, 0, 0), 1, "watergun");
         CreateItemServer(new Vector3(15, 0, 0), 1, "watergun");
         CreateItemServer(new Vector3(20, 0, 0), 1, "watergun");
+
+
+
+
+
+        // Testing, spawn another player
+        GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Resources/Prefabs/player.prefab", typeof(GameObject));
+
+        Debug.Log("Instantiating mock player");
+        GameObject mockPlayer = (GameObject)Instantiate(prefab, new Vector3(0, 0, 5), Quaternion.identity);
+        NetworkServer.Spawn(mockPlayer);
+
+        // Set the name of the player's game object
+        string playerName = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
+
+        ChangePlayerGameObjectNameClient(mockPlayer.name, playerName);
+        mockPlayer.name = playerName;
     }
 
     IEnumerator UpdateTimer(float updateInterval) {
