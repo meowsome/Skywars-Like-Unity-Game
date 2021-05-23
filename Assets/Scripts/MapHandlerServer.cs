@@ -11,6 +11,7 @@ using UnityEditor;
 
 public class MapHandlerServer : NetworkBehaviour {
     public Map map { get; set; }
+    public DamageTracker damageTracker { get; set; }
     private static float updateInterval = 0.3f;
     private bool createdStartingItems = false;
 
@@ -18,6 +19,7 @@ public class MapHandlerServer : NetworkBehaviour {
         if (isServer) {
             if (map == null) {
                 map = new Map(SceneManager.GetActiveScene().name);
+                damageTracker = new DamageTracker();
                 StartLobby();
             }
             
