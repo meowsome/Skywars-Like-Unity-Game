@@ -13,7 +13,7 @@ public class AttackHandler : NetworkBehaviour {
 
     void Start() {
         inventoryManagement = gameObject.GetComponent<InventoryManagement>();
-        itemUseHandler = GameObject.FindWithTag("Held Item").GetComponent<ItemUseHandler>();
+        itemUseHandler = transform.Find("Held Item").GetComponent<ItemUseHandler>();
     }
 
     void Update() {
