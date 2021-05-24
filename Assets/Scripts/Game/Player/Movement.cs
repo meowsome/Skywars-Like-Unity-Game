@@ -44,7 +44,7 @@ public class Movement : NetworkBehaviour {
             string playerName = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
             ChangePlayerGameObjectNameServer(gameObject.name, playerName);
 
-            GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>().setPlayer = playerName; // Set the name of the new player to the health behavior, for this client ONLY (not server, not other clients)
+            GameObject.Find("Health/Health Canvas/Health Bar").GetComponent<HealthBehavior>().name = playerName; // Set the name of the new player to the health behavior, for this client ONLY (not server, not other clients)
 
             inventoryManagement = gameObject.GetComponent<InventoryManagement>();
             

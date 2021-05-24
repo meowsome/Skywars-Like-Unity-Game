@@ -7,17 +7,7 @@ public class HealthBehavior : MonoBehaviour {
     private float maxHealth = 100.0f;
     private Slider slider;
     public float health;
-    private GameObject playerGameObject;
     public string name;
-    public string setPlayer {
-        get {
-            return this.playerGameObject.name;
-        }
-        set {
-            this.playerGameObject = GameObject.Find(value);
-            this.name = value;
-        }
-    }
 
     void Start() {
         health = maxHealth;
@@ -30,7 +20,7 @@ public class HealthBehavior : MonoBehaviour {
         slider.value = health;
 
         if (this.health < 0) {
-            playerGameObject.GetComponent<StateHandler>().enableSpectatorState();
+            GameObject.Find(name).GetComponent<StateHandler>().enableSpectatorState();
         }
     }
 
