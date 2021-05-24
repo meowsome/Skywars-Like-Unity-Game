@@ -15,6 +15,8 @@ public class StateHandler : MonoBehaviour {
         transform.localScale = new Vector3(0, 0, 0); // Hide from view
         gameObject.layer = LayerMask.NameToLayer("Spectators"); // Prevent collisions with map
 
+        // Reflect for server and all clients
+
         // Remove inventory and items
     }
 
