@@ -29,7 +29,10 @@ public class MapHandlerServer : NetworkBehaviour {
 
     [ClientRpc]
     void ChangePlayerGameObjectNameClient(string oldName, string newName) {
-        GameObject.Find(oldName).name = newName;
+        GameObject obj = GameObject.Find(oldName);
+        obj.name = newName;
+        obj.layer = LayerMask.NameToLayer("Players");
+        
     }
 
     void Update() {
@@ -55,6 +58,7 @@ public class MapHandlerServer : NetworkBehaviour {
 
         Debug.Log("Instantiating mock player");
         GameObject mockPlayer = (GameObject)Instantiate(prefab, new Vector3(0, 0, 5), Quaternion.identity);
+        mockPlayer.layer = LayerMask.NameToLayer("Players");
         NetworkServer.Spawn(mockPlayer);
 
         // Set the name of the player's game object
@@ -180,6 +184,7 @@ public class MapHandlerServer : NetworkBehaviour {
 
             item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
             item.name = itemName;
+            item.layer = LayerMask.NameToLayer("Dropped Items");
 
             NetworkServer.Spawn(item);
 
@@ -193,5 +198,6 @@ public class MapHandlerServer : NetworkBehaviour {
         item.transform.SetParent(GameObject.Find("Dropped Items/Canvas").transform);
         item.name = itemName;
         item.transform.position = pos;
+        item.layer = LayerMask.NameToLayer("Dropped Items");
     }
 }

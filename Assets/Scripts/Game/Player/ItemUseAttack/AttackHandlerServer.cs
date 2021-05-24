@@ -34,6 +34,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         // Set the sender and damage amount of the bullet
         bullet.GetComponent<BulletBehavior>().damage = damage;
         bullet.GetComponent<BulletBehavior>().sender = senderName;
+        bullet.layer = LayerMask.NameToLayer("Map Content");
 
         NetworkServer.Spawn(bullet); // Create on server
         FireClient(bullet, forward, spawnPos, senderName, damage); // Create on all clients
@@ -48,6 +49,7 @@ public class AttackHandlerServer : NetworkBehaviour {
         // Set the sender and damage amount of the bullet
         obj.GetComponent<BulletBehavior>().damage = damage;
         obj.GetComponent<BulletBehavior>().sender = senderName;
+        obj.layer = LayerMask.NameToLayer("Map Content");
     }
 
     private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay) {

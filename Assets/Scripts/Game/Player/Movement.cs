@@ -257,7 +257,7 @@ public class Movement : NetworkBehaviour {
     public void OnServerAddPlayer(NetworkConnection conn, System.Guid playerControllerId) {
         if (!isServer) {
             GameObject player = (GameObject)Instantiate(Resources.Load("Player"), Vector3.zero, Quaternion.identity);
-            // player.GetComponent<Player>().color = Color.red;
+            player.layer = LayerMask.NameToLayer("Players");
             NetworkServer.AddPlayerForConnection(conn, player, playerControllerId);
         }
     }
